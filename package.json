@@ -1,0 +1,16 @@
+{
+  "name": "mailblaster-pro-fullstack",
+  "version": "1.0.1",
+  "description": "Full-stack MailBlaster Pro application for Vercel deployment - Updated structure",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "node api/index.js",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "install-deps": "cd backend && npm install && cd ../frontend && npm install",
+    "deploy": "git add . && git commit -m 'Deploy to Vercel' && git push origin main"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

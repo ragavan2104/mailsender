@@ -1,0 +1,16 @@
+# Vercel ignore file for frontend
+node_modules
+.git
+.env
+.env.local
+.env.development
+*.log
+.DS_Store
+src/**/*.test.js
+src/**/*.test.jsx
+src/**/*.spec.js
+src/**/*.spec.jsx
+coverage
+.nyc_output
+*.tgz
+*.tar.gz
