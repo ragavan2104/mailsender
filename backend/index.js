@@ -26,7 +26,8 @@ const corsOptions = {
     'https://mailsender-uqwc-m3qjdrzcl-raagavans-projects.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
-    'http://localhost:5177'  // ✅ Added new dev port
+    'http://localhost:5176',  // ✅ Updated dev port
+    'http://localhost:5177'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -38,7 +39,7 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 
-// Handle preflight requests explicitly
+// Handle preflight requests explicitly for all routes
 app.options('*', cors(corsOptions));
 
 // Root endpoint - API information
