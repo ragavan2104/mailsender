@@ -20,6 +20,7 @@ console.log('CORS configured for:', CORS_ORIGIN);
 const corsOptions = {
   origin: [
     'https://mailsender-r7un-bwnck6t1g-raagavans-projects.vercel.app',
+    'https://mailsender-rfe.vercel.app',
     'https://mailsender-uqwc-m3qjdrzcl-raagavans-projects.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173'
