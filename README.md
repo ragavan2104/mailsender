@@ -15,7 +15,7 @@
 
 **A modern, scalable, and secure bulk email marketing platform built with the MERN stack**
 
-[Demo](https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app) • [Documentation](https://docs.bulk-mail-pro.com) • [API Reference](https://api.bulk-mail-pro.com) • [Support](mailto:support@bulk-mail-pro.com)
+🚀 **[🌐 LIVE APPLICATION](https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app)** 🚀 • [📚 Documentation](https://docs.bulk-mail-pro.com) • [📡 API Reference](https://api.bulk-mail-pro.com) • [💬 Support](mailto:support@bulk-mail-pro.com)
 
 </div>
 
@@ -57,7 +57,33 @@
 
 ---
 
+## 🎯 **Quick Start - Try It Now!**
+
+<div align="center">
+
+### 🚀 **[LAUNCH MAILBLASTER PRO](https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app)**
+
+**Ready to use • No installation required • Fully deployed**
+
+🔗 **Live Application**: https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app
+
+📡 **API Endpoint**: https://mailsender-sand.vercel.app
+
+</div>
+
+---
+
 ## ✨ Features
+
+### 🌟 **Try It Live!**
+
+**📱 [Access MailBlaster Pro Live Application](https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app)**
+
+- **Frontend**: https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app
+- **Backend API**: https://mailsender-sand.vercel.app
+- **Status**: ✅ Fully Deployed & Functional
+
+---
 
 ### 🚀 Core Capabilities
 
