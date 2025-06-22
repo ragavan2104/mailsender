@@ -16,31 +16,34 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 console.log('Environment:', process.env.NODE_ENV || 'development');
 console.log('CORS configured for:', CORS_ORIGIN);
 
-// CORS Configuration for production - Simplified for Vercel serverless
-const corsOptions = {
-  origin: [
-    'https://mailsender-81o2.vercel.app',  // ✅ LATEST FRONTEND URL
-    'https://mailsender-vert.vercel.app',  // ✅ PREVIOUS FRONTEND URL
-    'https://mailsender-r7un-bwnck6t1g-raagavans-projects.vercel.app',
-    'https://mailsender-rfe.vercel.app',
-    'https://mailsender-uqwc-m3qjdrzcl-raagavans-projects.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:5176',  // ✅ Updated dev port
-    'http://localhost:5177'
-  ],
+// Ultra-permissive CORS configuration - Allow all origins for deployment
+app.use(cors({
+  origin: true, // Allow all origins
   credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-};
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Access-Control-Allow-Origin'],
+  optionsSuccessStatus: 200
+}));
 
-// Middleware should be defined before routes
-app.use(cors(corsOptions))
-app.use(express.json())
+// Additional CORS headers middleware for extra compatibility
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Allow-Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
 
-// Handle preflight requests explicitly for all routes
-app.options('*', cors(corsOptions));
+// Body parser middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Root endpoint - API information
 app.get('/', (req, res) => {
@@ -49,6 +52,11 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     status: 'Running',
     timestamp: new Date().toISOString(),
+    cors: {
+      enabled: true,
+      allowsAllOrigins: true,
+      requestOrigin: req.headers.origin || 'none'
+    },
     endpoints: {
       health: '/health',
       auth: {
@@ -63,7 +71,7 @@ app.get('/', (req, res) => {
         stats: 'GET /dashboard-stats'
       }
     },
-    documentation: 'https://github.com/ragavan2104/mail-sender'
+    documentation: 'https://github.com/ragavan2104/mailsender'
   });
 });
 
@@ -73,7 +81,11 @@ app.get('/health', (req, res) => {
     status: 'OK', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    cors: {
+      origin: req.headers.origin || 'none',
+      userAgent: req.headers['user-agent'] || 'none'
+    }
   });
 });
 
