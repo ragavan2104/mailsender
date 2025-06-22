@@ -19,7 +19,8 @@ console.log('CORS configured for:', CORS_ORIGIN);
 // CORS Configuration for production - Simplified for Vercel serverless
 const corsOptions = {
   origin: [
-    'https://mailsender-vert.vercel.app',  // ✅ NEW FRONTEND URL
+    'https://mailsender-81o2.vercel.app',  // ✅ LATEST FRONTEND URL
+    'https://mailsender-vert.vercel.app',  // ✅ PREVIOUS FRONTEND URL
     'https://mailsender-r7un-bwnck6t1g-raagavans-projects.vercel.app',
     'https://mailsender-rfe.vercel.app',
     'https://mailsender-uqwc-m3qjdrzcl-raagavans-projects.vercel.app',
