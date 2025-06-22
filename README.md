@@ -15,7 +15,7 @@
 
 **A modern, scalable, and secure bulk email marketing platform built with the MERN stack**
 
-[Demo](https://bulk-mail-pro.vercel.app) • [Documentation](https://docs.bulk-mail-pro.com) • [API Reference](https://api.bulk-mail-pro.com) • [Support](mailto:support@bulk-mail-pro.com)
+[Demo](https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app) • [Documentation](https://docs.bulk-mail-pro.com) • [API Reference](https://api.bulk-mail-pro.com) • [Support](mailto:support@bulk-mail-pro.com)
 
 </div>
 
@@ -501,7 +501,7 @@ Authorization: Bearer <jwt-token>
      NODE_ENV=production
      JWT_SECRET=your-super-secure-jwt-secret
      MONGODB_URI=your-mongodb-connection-string
-     CORS_ORIGIN=https://your-frontend-domain.vercel.app
+     CORS_ORIGIN=https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app
      ```
 
 2. **Alternative: Render Deployment**:
@@ -550,7 +550,7 @@ NODE_ENV=production
 PORT=3000
 JWT_SECRET=your-super-secure-jwt-secret-key
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+CORS_ORIGIN=https://mailsender-x8cv-6t269n12u-raagavans-projects.vercel.app
 ```
 
 ### Deployment Troubleshooting
