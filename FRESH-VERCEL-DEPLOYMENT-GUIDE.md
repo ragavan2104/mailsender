@@ -146,10 +146,15 @@ The current CORS configuration allows all origins for maximum compatibility. Onc
 
 ## Your New URLs
 
-After following this guide, update these placeholders with your actual URLs:
+✅ **DEPLOYED SUCCESSFULLY**
 
-- **Backend**: `https://YOUR-NEW-BACKEND.vercel.app`
-- **Frontend**: `https://YOUR-NEW-FRONTEND.vercel.app`
+- **Backend**: `https://mailsender-sand.vercel.app`
+- **Frontend**: `https://mailsender-x8cv.vercel.app`
+
+### Quick Test Links:
+- Backend Health: https://mailsender-sand.vercel.app/health
+- Backend API Info: https://mailsender-sand.vercel.app/
+- Frontend Application: https://mailsender-x8cv.vercel.app/
 
 ---
 
