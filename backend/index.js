@@ -33,12 +33,6 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error', details: err.message });
-});
-
 // Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
 
@@ -78,8 +72,10 @@ app.get('/health', (req, res) => {
 });
 
 // Global variables to store transporter and sender email
-let transporter = null; // Will be initialized only after getting credentials from MongoDB
-let senderEmail = null; // Will store the sender email from MongoDB
+let transporter = null;
+let senderEmail = null;
+let mongoConnected = false;
+let mongoConnecting = false;
 
 // Email History Schema
 const emailHistorySchema = new mongoose.Schema({
@@ -128,51 +124,93 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Connect to MongoDB and fetch credentials
-console.log("Connecting to MongoDB to fetch email credentials...");
-mongoose.connect(MONGODB_URI)
-  .then(function(){
-    console.log("Connected to MongoDB Atlas successfully");
+// Lazy database connection for serverless
+async function connectToDatabase() {
+  if (mongoConnected) {
+    return true;
+  }
+  
+  if (mongoConnecting) {
+    // Wait for existing connection attempt
+    while (mongoConnecting) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return mongoConnected;
+  }
+  
+  try {
+    mongoConnecting = true;
+    console.log("Connecting to MongoDB...");
     
-    // Define schema for credentials
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      });
+    }
+    
+    console.log("Connected to MongoDB Atlas successfully");
+    mongoConnected = true;
+    
+    // Initialize email credentials
+    await initializeEmailCredentials();
+    
+    return true;
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    return false;
+  } finally {
+    mongoConnecting = false;
+  }
+}
+
+// Initialize email credentials
+async function initializeEmailCredentials() {
+  try {
     const credentialsSchema = new mongoose.Schema({
       user: String,
       pass: String
     });
     
     const credentials = mongoose.model("credentials", credentialsSchema, "bulkmail");
+    const data = await credentials.find();
     
-    // Fetch credentials and update transporter
-    return credentials.find();
-  })
-  .then(function(data){
     if (data && data.length > 0) {
       const emailCreds = data[0].toJSON();
-      senderEmail = emailCreds.user; // Store sender email globally
+      senderEmail = emailCreds.user;
       
-      // Initialize transporter with database credentials
-      transporter = nodemailer.createTransport({
+      transporter = nodemailer.createTransporter({
         service: "gmail",
         auth: {
           user: emailCreds.user,
           pass: emailCreds.pass,
         },
       });
-      console.log("Email transporter initialized with MongoDB credentials");
+      
+      console.log("Email transporter initialized");
       console.log(`Sender email: ${senderEmail}`);
-      console.log("Email service is ready!");
     } else {
       console.error("No credentials found in MongoDB database!");
-      console.log("Email service is NOT available - please add credentials to database");
     }
-  })
-  .catch(function(error){
-    console.error("MongoDB connection error:", error);
-    console.log("Email service is NOT available due to database connection failure");
-  });
+  } catch (error) {
+    console.error("Error initializing email credentials:", error);
+  }
+}
+
+// Database connection middleware for routes that need it
+const requireDatabase = async (req, res, next) => {
+  const connected = await connectToDatabase();
+  if (!connected) {
+    return res.status(503).json({ 
+      error: "Database connection failed", 
+      message: "Unable to connect to MongoDB. Please try again later." 
+    });
+  }
+  next();
+};
 
 // Authentication endpoints
-app.post("/register", async (req, res) => {
+app.post("/register", requireDatabase, async (req, res) => {
   try {
     const { username, password, email } = req.body;
     
@@ -204,7 +242,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login", requireDatabase, async (req, res) => {
   try {
     const { username, password } = req.body;
     
@@ -247,7 +285,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Get current user info
-app.get("/me", authenticateToken, async (req, res) => {
+app.get("/me", authenticateToken, requireDatabase, async (req, res) => {
   try {
     const admin = await Admin.findById(req.user.id).select("-password");
     res.json(admin);
@@ -258,7 +296,7 @@ app.get("/me", authenticateToken, async (req, res) => {
 });
 
 // Email History endpoints
-app.get("/email-history", authenticateToken, async (req, res) => {
+app.get("/email-history", authenticateToken, requireDatabase, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -287,7 +325,7 @@ app.get("/email-history", authenticateToken, async (req, res) => {
 });
 
 // Get detailed email history by ID
-app.get("/email-history/:id", authenticateToken, async (req, res) => {
+app.get("/email-history/:id", authenticateToken, requireDatabase, async (req, res) => {
   try {
     const email = await EmailHistory.findById(req.params.id);
     if (!email) {
@@ -301,7 +339,7 @@ app.get("/email-history/:id", authenticateToken, async (req, res) => {
 });
 
 // Dashboard statistics
-app.get("/dashboard-stats", authenticateToken, async (req, res) => {
+app.get("/dashboard-stats", authenticateToken, requireDatabase, async (req, res) => {
   try {
     const totalCampaigns = await EmailHistory.countDocuments();
     const totalEmailsSent = await EmailHistory.aggregate([
@@ -337,7 +375,7 @@ app.get("/dashboard-stats", authenticateToken, async (req, res) => {
 });
 
 // Bulk email send endpoint
-app.post("/sendmail", authenticateToken, async (req, res) => {
+app.post("/sendmail", authenticateToken, requireDatabase, async (req, res) => {
   try {
     // Check if transporter is available (credentials loaded from MongoDB)
     if (!transporter) {
@@ -430,7 +468,7 @@ app.post("/sendmail", authenticateToken, async (req, res) => {
 });
 
 // Single email send endpoint (for testing)
-app.post("/sendmail/single", async (req, res) => {
+app.post("/sendmail/single", requireDatabase, async (req, res) => {
   try {
     // Check if transporter is available (credentials loaded from MongoDB)
     if (!transporter) {
@@ -465,8 +503,36 @@ app.post("/sendmail/single", async (req, res) => {
     res.status(500).json({
       error: "Failed to send email",
       details: error.message
-    });
-  }
+    });  }
+});
+
+// Global error handling middleware - must be after all routes
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error', 
+    message: 'Something went wrong!',
+    details: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// 404 handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Not Found', 
+    message: `Route ${req.originalUrl} not found`,
+    availableEndpoints: [
+      'GET /',
+      'GET /health',
+      'POST /register',
+      'POST /login',
+      'GET /me',
+      'POST /sendmail',
+      'POST /sendmail/single',
+      'GET /email-history',
+      'GET /dashboard-stats'
+    ]
+  });
 });
 
 // For Vercel serverless deployment
