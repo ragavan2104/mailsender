@@ -54,15 +54,25 @@ function EmailHistory() {
 
   const getStatusColor = (successfulSends, totalRecipients) => {
     const successRate = (successfulSends / totalRecipients) * 100;
-    if (successRate >= 90) return 'text-green-400';
-    if (successRate >= 70) return 'text-yellow-400';
-    return 'text-red-400';
+    if (successRate >= 90) return 'text-green-600';
+    if (successRate >= 70) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getStatusBadge = (successfulSends, totalRecipients) => {
+    const successRate = (successfulSends / totalRecipients) * 100;
+    if (successRate >= 90) return 'bg-green-100 text-green-800';
+    if (successRate >= 70) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
   };
 
   if (loading && emails.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading email history...</p>
+        </div>
       </div>
     );
   }
@@ -70,61 +80,80 @@ function EmailHistory() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">📧 Email History</h2>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Email History</h1>
+          <p className="text-gray-600 mt-1">View and manage your sent email campaigns</p>
+        </div>
         <button
           onClick={fetchEmailHistory}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+          className="gradient-primary text-white px-4 py-2 rounded-lg transition-smooth btn-hover-lift flex items-center"
         >
-          🔄 Refresh
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Refresh
         </button>
       </div>
 
       {emails.length === 0 ? (
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10">
-          <div className="text-6xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold text-white mb-2">No Email History</h3>
-          <p className="text-gray-400">You haven't sent any campaigns yet. Start your first campaign!</p>
+        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-12 text-center">
+          <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Email History</h3>
+          <p className="text-gray-600 mb-6">You haven't sent any campaigns yet. Start your first campaign!</p>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'compose' }))}
+            className="gradient-primary text-white px-6 py-3 rounded-lg font-medium transition-smooth btn-hover-lift"
+          >
+            Create Campaign
+          </button>
         </div>
       ) : (
         <>
           {/* Email List */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 shadow-2xl overflow-hidden">
+          <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gradient-to-r from-purple-600/50 to-pink-600/50">
-                    <th className="px-6 py-4 text-left text-white font-semibold">Subject</th>
-                    <th className="px-6 py-4 text-left text-white font-semibold">Recipients</th>
-                    <th className="px-6 py-4 text-left text-white font-semibold">Success Rate</th>
-                    <th className="px-6 py-4 text-left text-white font-semibold">Sent Date</th>
-                    <th className="px-6 py-4 text-left text-white font-semibold">Actions</th>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Subject</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Recipients</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Success Rate</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Sent Date</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {emails.map((email) => (
-                    <tr key={email._id} className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200">
+                    <tr key={email._id} className="border-b border-gray-100 hover:bg-gray-50 transition-smooth">
                       <td className="px-6 py-4">
-                        <div className="text-white font-medium">{email.subject}</div>
-                        <div className="text-gray-400 text-sm truncate max-w-xs">{email.body}</div>
+                        <div className="text-gray-900 font-medium">{email.subject}</div>
+                        <div className="text-gray-500 text-sm truncate max-w-xs">{email.body}</div>
                       </td>
-                      <td className="px-6 py-4 text-white">{email.totalRecipients}</td>
+                      <td className="px-6 py-4">
+                        <div className="text-gray-900 font-medium">{email.totalRecipients}</div>
+                        <div className="text-gray-500 text-sm">Total sent</div>
+                      </td>
                       <td className="px-6 py-4">
                         <div className={`font-semibold ${getStatusColor(email.successfulSends, email.totalRecipients)}`}>
                           {Math.round((email.successfulSends / email.totalRecipients) * 100)}%
                         </div>
-                        <div className="text-gray-400 text-sm">
-                          {email.successfulSends}/{email.totalRecipients}
+                        <div className="text-gray-500 text-sm">
+                          {email.successfulSends}/{email.totalRecipients} delivered
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-300 text-sm">
-                        {formatDate(email.sentAt)}
+                      <td className="px-6 py-4">
+                        <div className="text-gray-900 text-sm">
+                          {formatDate(email.sentAt)}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <button
                           onClick={() => fetchEmailDetails(email._id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors duration-200"
+                          className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium transition-smooth"
                         >
-                          👁️ Details
+                          View Details
                         </button>
                       </td>
                     </tr>
@@ -140,19 +169,19 @@ function EmailHistory() {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                className="bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-700 disabled:text-gray-400 px-4 py-2 rounded-lg border border-gray-300 transition-smooth font-medium"
               >
                 ← Previous
               </button>
               
-              <span className="text-white">
+              <span className="text-gray-700 font-medium">
                 Page {pagination.currentPage} of {pagination.totalPages}
               </span>
               
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.totalPages))}
                 disabled={currentPage === pagination.totalPages}
-                className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                className="bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-700 disabled:text-gray-400 px-4 py-2 rounded-lg border border-gray-300 transition-smooth font-medium"
               >
                 Next →
               </button>
@@ -163,14 +192,14 @@ function EmailHistory() {
 
       {/* Email Details Modal */}
       {selectedEmail && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-elegant max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-start mb-6">
-                <h3 className="text-2xl font-bold text-white">📧 Email Campaign Details</h3>
+                <h3 className="text-2xl font-bold text-gray-900">Email Campaign Details</h3>
                 <button
                   onClick={() => setSelectedEmail(null)}
-                  className="text-white/70 hover:text-white text-2xl"
+                  className="text-gray-400 hover:text-gray-600 text-2xl transition-smooth"
                 >
                   ✕
                 </button>
@@ -179,55 +208,57 @@ function EmailHistory() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-gray-400 text-sm">Subject</label>
-                    <div className="text-white font-semibold">{selectedEmail.subject}</div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                    <div className="text-gray-900 font-semibold">{selectedEmail.subject}</div>
                   </div>
                   <div>
-                    <label className="block text-gray-400 text-sm">Sent Date</label>
-                    <div className="text-white">{formatDate(selectedEmail.sentAt)}</div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sent Date</label>
+                    <div className="text-gray-900">{formatDate(selectedEmail.sentAt)}</div>
                   </div>
                   <div>
-                    <label className="block text-gray-400 text-sm">Sent By</label>
-                    <div className="text-white">{selectedEmail.sentBy}</div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sent By</label>
+                    <div className="text-gray-900">{selectedEmail.sentBy}</div>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-blue-500/20 rounded-xl p-4 border border-blue-500/30">
-                    <div className="text-2xl font-bold text-blue-400">{selectedEmail.totalRecipients}</div>
-                    <div className="text-blue-300 text-sm">Total</div>
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 text-center">
+                    <div className="text-2xl font-bold text-blue-600">{selectedEmail.totalRecipients}</div>
+                    <div className="text-blue-700 text-sm font-medium">Total</div>
                   </div>
-                  <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/30">
-                    <div className="text-2xl font-bold text-green-400">{selectedEmail.successfulSends}</div>
-                    <div className="text-green-300 text-sm">Success</div>
+                  <div className="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
+                    <div className="text-2xl font-bold text-green-600">{selectedEmail.successfulSends}</div>
+                    <div className="text-green-700 text-sm font-medium">Success</div>
                   </div>
-                  <div className="bg-red-500/20 rounded-xl p-4 border border-red-500/30">
-                    <div className="text-2xl font-bold text-red-400">{selectedEmail.failedSends}</div>
-                    <div className="text-red-300 text-sm">Failed</div>
+                  <div className="bg-red-50 rounded-lg p-4 border border-red-200 text-center">
+                    <div className="text-2xl font-bold text-red-600">{selectedEmail.failedSends}</div>
+                    <div className="text-red-700 text-sm font-medium">Failed</div>
                   </div>
                 </div>
               </div>
 
               <div className="mb-6">
-                <label className="block text-gray-400 text-sm mb-2">Email Body</label>
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <div className="text-white whitespace-pre-wrap">{selectedEmail.body}</div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Body</label>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="text-gray-900 whitespace-pre-wrap">{selectedEmail.body}</div>
                 </div>
               </div>
 
               {/* Recipients List */}
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Recipients ({selectedEmail.recipients.length})</label>
-                <div className="bg-white/5 rounded-xl border border-white/10 max-h-64 overflow-y-auto">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Recipients ({selectedEmail.recipients.length})
+                </label>
+                <div className="bg-gray-50 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
                   {selectedEmail.recipients.map((recipient, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 border-b border-white/5 last:border-b-0">
-                      <span className="text-white">{recipient.email}</span>
-                      <span className={`px-2 py-1 rounded text-sm ${
+                    <div key={index} className="flex justify-between items-center p-3 border-b border-gray-200 last:border-b-0">
+                      <span className="text-gray-900">{recipient.email}</span>
+                      <span className={`px-2 py-1 rounded-lg text-sm font-medium ${
                         recipient.status === 'success' 
-                          ? 'bg-green-500/20 text-green-300' 
-                          : 'bg-red-500/20 text-red-300'
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
                       }`}>
-                        {recipient.status === 'success' ? '✅ Sent' : '❌ Failed'}
+                        {recipient.status === 'success' ? 'Delivered' : 'Failed'}
                       </span>
                     </div>
                   ))}
