@@ -6,7 +6,6 @@ import Dashboard from './Dashboard';
 import EmailHistory from './EmailHistory';
 import EmailComposer from './components/EmailComposer';
 import LoadingSpinner from './components/LoadingSpinner';
-import DebugUrls from './components/DebugUrls'; // Debug component
 
 // Main App Component
 function MainApp() {
@@ -57,7 +56,6 @@ function MainApp() {
         <div className="animate-fade-in">
           {renderCurrentView()}
         </div>
-        <DebugUrls /> {/* Include debug component here */}
       </main>
     </div>
   );
