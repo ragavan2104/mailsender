@@ -64,14 +64,14 @@ const DebugUrls = () => {
       zIndex: 9999,
       borderRadius: '4px'
     }}>
-      <h4>🐛 Debug URLs:</h4>
+      {/* <h4>🐛 Debug URLs:</h4>
       <p><strong>Raw VITE_API_URL:</strong> {rawApiUrl}</p>
       <p><strong>Cleaned Base URL:</strong> {cleanedApiUrl}</p>
       <p><strong>Environment:</strong> {import.meta.env.MODE}</p>
       <p><strong>REGISTER Endpoint:</strong> {API_ENDPOINTS.REGISTER}</p>
       <p><strong>LOGIN Endpoint:</strong> {API_ENDPOINTS.LOGIN}</p>
       <p style={{color: doubleSlashFound ? 'red' : 'green'}}>
-        <strong>Double Slash Check:</strong> {doubleSlashFound ? '❌ FOUND' : '✅ CLEAN'}
+        <strong>Double Slash Check:</strong> {doubleSlashFound ? '❌ FUND' : '✅ CLEAN'} */}
       </p>
       <div style={{marginTop: '10px'}}>
         <button 
