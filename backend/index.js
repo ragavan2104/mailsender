@@ -313,19 +313,22 @@ app.get("/me", authenticateToken, requireDatabase, async (req, res) => {
   }
 });
 
-// Email History endpoints
+// Email History endpoints - FIXED: Only show emails sent by the authenticated user
 app.get("/email-history", authenticateToken, requireDatabase, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const totalEmails = await EmailHistory.countDocuments();
-    const emails = await EmailHistory.find()
+    // SECURITY FIX: Filter by authenticated user only
+    const userFilter = { sentBy: req.user.username };
+    
+    const totalEmails = await EmailHistory.countDocuments(userFilter);
+    const emails = await EmailHistory.find(userFilter)
       .sort({ sentAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select('-recipients'); // Exclude detailed recipient info for list view
+      .select('-recipients'); 
 
     res.json({
       emails,
@@ -342,12 +345,17 @@ app.get("/email-history", authenticateToken, requireDatabase, async (req, res) =
   }
 });
 
-// Get detailed email history by ID
+// Get detailed email history by ID - FIXED: Only allow access to user's own emails
 app.get("/email-history/:id", authenticateToken, requireDatabase, async (req, res) => {
   try {
-    const email = await EmailHistory.findById(req.params.id);
+    // SECURITY FIX: Only allow users to access their own email records
+    const email = await EmailHistory.findOne({ 
+      _id: req.params.id, 
+      sentBy: req.user.username 
+    });
+    
     if (!email) {
-      return res.status(404).json({ error: "Email record not found" });
+      return res.status(404).json({ error: "Email record not found or access denied" });
     }
     res.json(email);
   } catch (error) {
@@ -356,20 +364,26 @@ app.get("/email-history/:id", authenticateToken, requireDatabase, async (req, re
   }
 });
 
-// Dashboard statistics
+// Dashboard statistics - FIXED: Only show stats for authenticated user
 app.get("/dashboard-stats", authenticateToken, requireDatabase, async (req, res) => {
   try {
-    const totalCampaigns = await EmailHistory.countDocuments();
+    // SECURITY FIX: Filter all queries by authenticated user
+    const userFilter = { sentBy: req.user.username };
+    
+    const totalCampaigns = await EmailHistory.countDocuments(userFilter);
     const totalEmailsSent = await EmailHistory.aggregate([
+      { $match: userFilter },
       { $group: { _id: null, total: { $sum: "$successfulSends" } } }
     ]);
     const totalEmailsFailed = await EmailHistory.aggregate([
+      { $match: userFilter },
       { $group: { _id: null, total: { $sum: "$failedSends" } } }
     ]);
 
-    // Recent campaigns (last 7 days)
+    // Recent campaigns (last 7 days) - filtered by user
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const recentCampaigns = await EmailHistory.countDocuments({
+      ...userFilter,
       sentAt: { $gte: sevenDaysAgo }
     });
 
